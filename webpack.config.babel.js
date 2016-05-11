@@ -26,7 +26,7 @@ const productionPlugin = new webpack.DefinePlugin({
 })
 
 
-
+/* Base directory */
 const base = {
   entry: [
     PATHS.app,
@@ -42,6 +42,10 @@ const base = {
             {test: /\.css$/, loader: 'style!css?sourceMap&modules&localIdentName=[name]__[local]___[hash:base64:5]'}
           ]
     },
+      resolve: {
+        /* Deletes to absolute path when importing files*/
+        root: path.resolve('./app')
+      }
 }
 
 const developmentConfig = {
