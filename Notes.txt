@@ -1,0 +1,2 @@
+#Note
+- Change webpack.config.js to webpack.config.babel.js to allow merging of objects
