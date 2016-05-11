@@ -1,9 +1,8 @@
 import React from 'react'
-
 const MainContainer = React.createClass({
   render () {
     return (
-      <p>{'Hello World!'}</p>
+      <p>{`llo Test Hot Modul`}</p>
     )
   },
 })

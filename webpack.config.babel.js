@@ -16,6 +16,8 @@ const PATHS = {
 const LAUNCH_COMMAND = process.env.npm_lifecycle_event
 /* Launch production if true */
 const isProduction = LAUNCH_COMMAND === 'production';
+/* Determines whether npm run start is in production or development */
+process.env.BABEL_ENV = LAUNCH_COMMAND
 /* Create a production plugin and reduce size of build */
 const productionPlugin = new webpack.DefinePlugin({
   'process.env': {
@@ -36,14 +38,21 @@ const base = {
   module: {
       loaders: [
             {test: /\.js$/, exclude: /node_modules/, loader: "babel-loader"},
-            {test: /\.css$/, loader: 'style-loader!css-loader'}
+            /* Hash included to allow css module loader*/
+            {test: /\.css$/, loader: 'style!css?sourceMap&modules&localIdentName=[name]__[local]___[hash:base64:5]'}
           ]
     },
 }
 
 const developmentConfig = {
   devtool: 'cheap-module-inline-source-map',
-  plugins: [HTMLWebpackPluginConfig]
+  devServer: {
+    contentBase: PATHS.build,
+    hot: true,
+    inline: true,
+    progress: true,
+  },
+  plugins: [HTMLWebpackPluginConfig, new webpack.HotModuleReplacementPlugin()]
 }
 
 const productionConfig = {
