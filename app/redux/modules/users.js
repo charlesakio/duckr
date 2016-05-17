@@ -1,10 +1,13 @@
+import auth from 'helpers/auth'
+
 const AUTH_USER = 'AUTH_USER'
 const UNAUTH_USER = 'UNAUTH_USER'
 const FETCHING_USER = 'FETCHING_USER'
 const FETCHING_USER_FAILURE = 'FETCHING_USER_FAILURE'
 const FETCHING_USER_SUCCESS = 'FETCHING_USER_SUCCESS'
 
-export function authUser (uid) {
+//************************* ACTION CREATORS***********************//
+function authUser (uid) {
   return {
     type: AUTH_USER,
     uid,
@@ -17,13 +20,13 @@ function unauthUser () {
   }
 }
 
-export function fetchingUser () {
+function fetchingUser () {
   return {
     type: FETCHING_USER,
   }
 }
 
-export function fetchingUserFailure (error) {
+function fetchingUserFailure (error) {
 //  console.warn(error)
     return {
       type: FETCHING_USER_FAILURE,
@@ -31,7 +34,7 @@ export function fetchingUserFailure (error) {
     }
 }
 
-export function fetchingUserSuccess (uid, user, timestamp) {
+function fetchingUserSuccess (uid, user, timestamp) {
   return {
     type: FETCHING_USER_SUCCESS,
     uid,
@@ -40,6 +43,19 @@ export function fetchingUserSuccess (uid, user, timestamp) {
   }
 }
 
+export function fetchAndHandleAuthedUser () {
+  return function (dispatch) {
+    dispatch(fetchingUser())
+     auth().then((user) => { 
+       dispatch(fetchingUserSuccess(user.uid, user, Date.now()))
+       dispatch(authUser(user.uid)) 
+     })
+     .catch((error) => dispatch(fetchUserFailure(error)))
+  }
+}
+
+
+//************************** REDUCERS ***********************//
 const initialUserState = {
   lastUpdated: 0,
   info: {
@@ -48,6 +64,7 @@ const initialUserState = {
     avatar: '',
   },
 }
+
 
 function user (state = initialUserState, action) {
   switch (action.type) {
