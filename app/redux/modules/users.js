@@ -1,4 +1,5 @@
-import auth, { logout } from 'helpers/auth'
+import auth, { logout, saveUser } from 'helpers/auth'
+import { formatUserInfo } from 'helpers/utils'
 
 const AUTH_USER = 'AUTH_USER'
 const UNAUTH_USER = 'UNAUTH_USER'
@@ -7,7 +8,7 @@ const FETCHING_USER_FAILURE = 'FETCHING_USER_FAILURE'
 const FETCHING_USER_SUCCESS = 'FETCHING_USER_SUCCESS'
 
 //************************* ACTION CREATORS***********************//
-function authUser (uid) {
+export function authUser (uid) {
   return {
     type: AUTH_USER,
     uid,
@@ -34,7 +35,7 @@ function fetchingUserFailure (error) {
     }
 }
 
-function fetchingUserSuccess (uid, user, timestamp) {
+export function fetchingUserSuccess (uid, user, timestamp) {
   return {
     type: FETCHING_USER_SUCCESS,
     uid,
@@ -46,11 +47,13 @@ function fetchingUserSuccess (uid, user, timestamp) {
 export function fetchAndHandleAuthedUser () {
   return function (dispatch) {
     dispatch(fetchingUser())
-     return auth().then((user) => { 
-       dispatch(fetchingUserSuccess(user.uid, user, Date.now()))
-       dispatch(authUser(user.uid)) 
+     return auth().then(({uid, facebook}) => { 
+       const userInfo = formatUserInfo(facebook.displayName, facebook.profileImageURL, uid)
+       return dispatch(fetchingUserSuccess(uid, userInfo, Date.now()))
      })
-     .catch((error) => dispatch(fetchUserFailure(error)))
+     .then(({user}) => saveUser(user))
+     .then(() => dispatch(authUser(user.uid)))
+     .catch((error) => dispatch(fetchingUserFailure(error)))
   }
 }
 
